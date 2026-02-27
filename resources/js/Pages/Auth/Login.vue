@@ -4,7 +4,7 @@
             <div class="bg-white rounded-2xl shadow-xl p-8">
                 <div class="text-center mb-8">
                     <h1 class="text-4xl font-bold text-blue-600 mb-2">Kasflow</h1>
-                    <p class="text-gray-600">Financial Recording for Warung</p>
+                    <p class="text-gray-600">ISP Management System</p>
                 </div>
 
                 <form @submit.prevent="handleSubmit">
@@ -58,12 +58,6 @@
                         Don't have an account? Register
                     </Link>
                 </div>
-            </div>
-
-            <div class="mt-6 text-center text-sm text-gray-600">
-                <p>Demo Accounts:</p>
-                <p class="mt-1">Owner: owner@example.com / password</p>
-                <p>Cashier: cashier1@example.com / password</p>
             </div>
         </div>
     </div>

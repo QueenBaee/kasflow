@@ -14,6 +14,7 @@ class StoreIncomeRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'customer_id' => ['required', 'exists:customers,id'],
             'amount' => ['required', 'numeric', 'gt:0', 'max:999999999.99'],
             'note' => ['nullable', 'string', 'max:1000'],
         ];

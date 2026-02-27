@@ -46,4 +46,9 @@ class StorePolicy
     {
         return $user->isStoreOwner($store->id);
     }
+
+    public function createIncome(User $user, Store $store): bool
+    {
+        return $user->hasStoreAccess($store->id);
+    }
 }

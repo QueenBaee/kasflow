@@ -3,83 +3,85 @@
         <div class="space-y-6">
             <h1 class="text-3xl font-bold text-gray-900">Financial Reports</h1>
 
-            <div class="bg-white rounded-lg shadow">
-                <div class="border-b border-gray-200">
-                    <nav class="flex -mb-px">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="space-y-4">
+                    <div class="flex gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                            <input
+                                v-model="startDate"
+                                type="date"
+                                :max="today"
+                                class="px-4 py-2 border border-gray-300 rounded-lg"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                            <input
+                                v-model="endDate"
+                                type="date"
+                                :max="today"
+                                class="px-4 py-2 border border-gray-300 rounded-lg"
+                            />
+                        </div>
                         <button
-                            v-for="tab in tabs"
-                            :key="tab.id"
-                            @click="activeTab = tab.id"
-                            class="px-6 py-4 text-sm font-medium border-b-2 transition-colors"
-                            :class="activeTab === tab.id
-                                ? 'border-blue-500 text-blue-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            @click="loadReport"
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                         >
-                            {{ tab.name }}
+                            Load Report
                         </button>
-                    </nav>
-                </div>
-
-                <div class="p-6">
-                    <div v-if="activeTab === 'daily'" class="space-y-4">
-                        <input
-                            v-model="dailyDate"
-                            type="date"
-                            :max="today"
-                            class="px-4 py-2 border border-gray-300 rounded-lg"
-                        />
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <SummaryStatCard label="Income" :value="dailyReport.total_income" type="income" />
-                            <SummaryStatCard label="Expense" :value="dailyReport.total_expense" type="expense" />
-                            <SummaryStatCard label="Profit" :value="dailyReport.profit" type="profit" />
-                        </div>
                     </div>
-
-                    <div v-if="activeTab === 'weekly'" class="space-y-4">
-                        <div class="flex gap-4">
-                            <input
-                                v-model="weeklyStart"
-                                type="date"
-                                :max="today"
-                                class="px-4 py-2 border border-gray-300 rounded-lg"
-                            />
-                            <input
-                                v-model="weeklyEnd"
-                                type="date"
-                                :max="today"
-                                class="px-4 py-2 border border-gray-300 rounded-lg"
-                            />
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <SummaryStatCard label="Income" :value="0" type="income" />
-                            <SummaryStatCard label="Expense" :value="0" type="expense" />
-                            <SummaryStatCard label="Profit" :value="0" type="profit" />
-                        </div>
-                    </div>
-
-                    <div v-if="activeTab === 'monthly'" class="space-y-4">
-                        <div class="flex gap-4">
-                            <select v-model="monthlyMonth" class="px-4 py-2 border border-gray-300 rounded-lg">
-                                <option v-for="m in 12" :key="m" :value="m">{{ getMonthName(m) }}</option>
-                            </select>
-                            <select v-model="monthlyYear" class="px-4 py-2 border border-gray-300 rounded-lg">
-                                <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <SummaryStatCard label="Income" :value="0" type="income" />
-                            <SummaryStatCard label="Expense" :value="0" type="expense" />
-                            <SummaryStatCard label="Profit" :value="0" type="profit" />
-                        </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <SummaryStatCard label="Income" :value="reportData.total_income" type="income" />
+                        <SummaryStatCard label="Expense" :value="reportData.total_expense" type="expense" />
+                        <SummaryStatCard label="Profit" :value="reportData.profit" type="profit" />
                     </div>
                 </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Transaction Details</h2>
+                </div>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Note</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr v-for="transaction in transactions" :key="transaction.id">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ formatDate(transaction.transaction_date) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span :class="transaction.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-1 text-xs font-semibold rounded-full">
+                                    {{ transaction.type }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ transaction.customer?.name || '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ transaction.category || '-' }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">{{ transaction.note || '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" :class="transaction.type === 'income' ? 'text-green-600' : 'text-red-600'">
+                                {{ formatCurrency(transaction.amount) }}
+                            </td>
+                        </tr>
+                        <tr v-if="transactions.length === 0">
+                            <td colspan="6" class="px-6 py-8 text-center text-gray-500">No transactions found</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </OwnerLayout>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import OwnerLayout from '../../Layouts/OwnerLayout.vue';
 import SummaryStatCard from '../../Components/SummaryStatCard.vue';
 import { router } from '@inertiajs/vue3';
@@ -87,39 +89,33 @@ import { router } from '@inertiajs/vue3';
 const props = defineProps({
     stores: { type: Array, default: () => [] },
     currentStore: Object,
-    dailyReport: { type: Object, default: () => ({ total_income: 0, total_expense: 0, profit: 0 }) },
+    reportData: { type: Object, default: () => ({ total_income: 0, total_expense: 0, profit: 0 }) },
+    transactions: { type: Array, default: () => [] },
+    startDate: { type: String, default: () => new Date().toISOString().split('T')[0] },
+    endDate: { type: String, default: () => new Date().toISOString().split('T')[0] },
 });
 
-const activeTab = ref('daily');
-const dailyDate = ref(new Date().toISOString().split('T')[0]);
-const weeklyStart = ref(new Date().toISOString().split('T')[0]);
-const weeklyEnd = ref(new Date().toISOString().split('T')[0]);
-const monthlyMonth = ref(new Date().getMonth() + 1);
-const monthlyYear = ref(new Date().getFullYear());
-
-const reportData = ref(props.dailyReport);
-
-const tabs = [
-    { id: 'daily', name: 'Daily' },
-    { id: 'weekly', name: 'Weekly' },
-    { id: 'monthly', name: 'Monthly' },
-];
+const startDate = ref(props.startDate);
+const endDate = ref(props.endDate);
 
 const today = computed(() => new Date().toISOString().split('T')[0]);
 
-const years = computed(() => {
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 5 }, (_, i) => currentYear - i);
-});
-
-const getMonthName = (month) => {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    return months[month - 1];
+const formatCurrency = (value) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
 };
 
-watch(dailyDate, () => {
-    if (activeTab.value === 'daily' && props.currentStore) {
-        router.reload({ data: { date: dailyDate.value } });
+const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
+};
+
+const loadReport = () => {
+    if (props.currentStore) {
+        router.reload({ 
+            data: { 
+                start_date: startDate.value,
+                end_date: endDate.value
+            } 
+        });
     }
-});
+};
 </script>

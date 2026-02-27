@@ -14,8 +14,10 @@ class TransactionService
         return Transaction::create([
             'store_id' => $storeId,
             'user_id' => $user->id,
+            'customer_id' => $data['customer_id'] ?? null,
             'type' => 'income',
             'amount' => $data['amount'],
+            'category' => 'Payment',
             'note' => $data['note'] ?? null,
             'transaction_date' => now()->format('Y-m-d'),
         ]);

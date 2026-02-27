@@ -49,26 +49,59 @@ Route::middleware('auth')->group(function () {
             'currentStore' => auth()->user()->stores()->first(),
         ]))->name('expenses.index');
 
-        Route::get('/reports', function () {
+        Route::get('/income', function () {
             $user = auth()->user();
             $currentStore = $user->stores()->first();
-            $dailyReport = ['total_income' => 0, 'total_expense' => 0, 'profit' => 0];
+            $customers = $currentStore ? $currentStore->customers : [];
+            
+            return Inertia::render('Owner/Income', [
+                'stores' => $user->stores,
+                'currentStore' => $currentStore,
+                'customers' => $customers,
+            ]);
+        })->name('income.index');
+
+        Route::get('/reports', function (Request $request) {
+            $user = auth()->user();
+            $currentStore = $user->stores()->first();
+            $reportData = ['total_income' => 0, 'total_expense' => 0, 'profit' => 0];
+            $transactions = [];
             
             if ($currentStore) {
-                $today = now()->format('Y-m-d');
-                $todayIncome = $currentStore->transactions()->where('type', 'income')->where('transaction_date', $today)->sum('amount');
-                $todayExpense = $currentStore->transactions()->where('type', 'expense')->where('transaction_date', $today)->sum('amount');
-                $dailyReport = [
-                    'total_income' => (float) $todayIncome,
-                    'total_expense' => (float) $todayExpense,
-                    'profit' => (float) ($todayIncome - $todayExpense),
+                $startDate = $request->input('start_date', now()->format('Y-m-d'));
+                $endDate = $request->input('end_date', now()->format('Y-m-d'));
+                
+                $income = $currentStore->transactions()
+                    ->where('type', 'income')
+                    ->whereBetween('transaction_date', [$startDate, $endDate])
+                    ->sum('amount');
+                    
+                $expense = $currentStore->transactions()
+                    ->where('type', 'expense')
+                    ->whereBetween('transaction_date', [$startDate, $endDate])
+                    ->sum('amount');
+                    
+                $reportData = [
+                    'total_income' => (float) $income,
+                    'total_expense' => (float) $expense,
+                    'profit' => (float) ($income - $expense),
                 ];
+                
+                $transactions = $currentStore->transactions()
+                    ->with(['user', 'customer'])
+                    ->whereBetween('transaction_date', [$startDate, $endDate])
+                    ->orderBy('transaction_date', 'desc')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
             }
             
             return Inertia::render('Owner/Reports', [
                 'stores' => $user->stores,
                 'currentStore' => $currentStore,
-                'dailyReport' => $dailyReport,
+                'reportData' => $reportData,
+                'transactions' => $transactions,
+                'startDate' => $request->input('start_date', now()->format('Y-m-d')),
+                'endDate' => $request->input('end_date', now()->format('Y-m-d')),
             ]);
         })->name('reports.index');
 
@@ -89,9 +122,25 @@ Route::middleware('auth')->group(function () {
             'currentStore' => auth()->user()->stores()->first(),
         ]))->name('stores.index');
 
+        Route::get('/customers', function () {
+            $user = auth()->user();
+            $currentStore = $user->stores()->first();
+            $customers = $currentStore ? $currentStore->customers : [];
+            
+            return Inertia::render('Owner/Customers', [
+                'stores' => $user->stores,
+                'currentStore' => $currentStore,
+                'customers' => $customers,
+            ]);
+        })->name('customers.index');
+
         Route::post('/stores/{store}/cashiers/assign', [\App\Http\Controllers\StoreController::class, 'assignCashier'])->name('cashiers.assign');
         Route::delete('/stores/{store}/cashiers/{user}', [\App\Http\Controllers\StoreController::class, 'removeCashier'])->name('cashiers.remove');
         Route::post('/stores/{store}/transactions/expense', [TransactionController::class, 'storeExpense'])->name('transactions.expense.store');
+        
+        Route::post('/stores/{store}/customers', [\App\Http\Controllers\CustomerController::class, 'store'])->name('customers.store');
+        Route::put('/stores/{store}/customers/{customer}', [\App\Http\Controllers\CustomerController::class, 'update'])->name('customers.update');
+        Route::delete('/stores/{store}/customers/{customer}', [\App\Http\Controllers\CustomerController::class, 'destroy'])->name('customers.destroy');
     });
 
     // Shared route (Owner + Cashier)

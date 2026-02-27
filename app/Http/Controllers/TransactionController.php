@@ -22,7 +22,7 @@ class TransactionController extends Controller
     public function storeIncome(StoreIncomeRequest $request, Store $store): RedirectResponse
     {
         if (!$request->user()->hasStoreAccess($store->id)) {
-            return redirect()->route('cashier.home')
+            return redirect()->route('dashboard')
                 ->with('error', 'You do not have access to this store.');
         }
 
@@ -31,6 +31,11 @@ class TransactionController extends Controller
             $request->user(),
             $request->validated()
         );
+
+        if ($request->user()->isOwner()) {
+            return redirect()->route('dashboard')
+                ->with('success', 'Income recorded successfully');
+        }
 
         return redirect()->route('cashier.home')
             ->with('success', 'Income recorded successfully');
