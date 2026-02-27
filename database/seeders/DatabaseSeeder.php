@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customer;
 use App\Models\Store;
 use App\Models\Transaction;
 use App\Models\User;
@@ -32,12 +33,12 @@ class DatabaseSeeder extends Seeder
 
         $store1 = Store::create([
             'owner_id' => $owner->id,
-            'name' => 'Warung Maju Jaya',
+            'name' => 'ISP Maju Jaya',
         ]);
 
         $store2 = Store::create([
             'owner_id' => $owner->id,
-            'name' => 'Warung Berkah',
+            'name' => 'ISP Berkah',
         ]);
 
         $store1->users()->attach($owner->id, ['role' => 'owner']);
@@ -46,12 +47,29 @@ class DatabaseSeeder extends Seeder
         $store2->users()->attach($owner->id, ['role' => 'owner']);
         $store2->users()->attach($cashier2->id, ['role' => 'cashier']);
 
+        // Create customers for store1
+        $customers = [
+            ['name' => 'Budi Santoso', 'phone' => '081234567890', 'speed_package' => '10 Mbps', 'monthly_fee' => 250000],
+            ['name' => 'Siti Aminah', 'phone' => '081234567891', 'speed_package' => '20 Mbps', 'monthly_fee' => 350000],
+            ['name' => 'Ahmad Yani', 'phone' => '081234567892', 'speed_package' => '30 Mbps', 'monthly_fee' => 450000],
+            ['name' => 'Dewi Lestari', 'phone' => '081234567893', 'speed_package' => '50 Mbps', 'monthly_fee' => 600000],
+            ['name' => 'Rudi Hartono', 'phone' => '081234567894', 'speed_package' => '10 Mbps', 'monthly_fee' => 250000],
+            ['name' => 'Rina Wijaya', 'phone' => '081234567895', 'speed_package' => '20 Mbps', 'monthly_fee' => 350000],
+            ['name' => 'Agus Setiawan', 'phone' => '081234567896', 'speed_package' => '100 Mbps', 'monthly_fee' => 800000],
+            ['name' => 'Maya Sari', 'phone' => '081234567897', 'speed_package' => '30 Mbps', 'monthly_fee' => 450000],
+        ];
+
+        foreach ($customers as $customerData) {
+            Customer::create(array_merge($customerData, ['store_id' => $store1->id]));
+        }
+
         for ($i = 0; $i < 10; $i++) {
             Transaction::create([
                 'store_id' => $store1->id,
                 'user_id' => $cashier1->id,
                 'type' => 'income',
                 'amount' => rand(10000, 500000),
+                'category' => 'Payment',
                 'note' => 'Sample income transaction',
                 'transaction_date' => now()->subDays(rand(0, 30)),
             ]);
@@ -75,6 +93,7 @@ class DatabaseSeeder extends Seeder
                 'user_id' => $cashier2->id,
                 'type' => 'income',
                 'amount' => rand(15000, 400000),
+                'category' => 'Payment',
                 'note' => 'Sample income transaction',
                 'transaction_date' => now()->subDays(rand(0, 30)),
             ]);
