@@ -5,15 +5,15 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Record Income</h2>
 
                 <form @submit.prevent="handleSubmit" class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Customer</label>
-                        <select v-model="form.customer_id" @change="onCustomerChange" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option :value="null">-- Select Customer --</option>
-                            <option v-for="customer in customers" :key="customer.id" :value="customer.id">
-                                {{ customer.name }} - {{ customer.speed_package }} ({{ formatCurrency(customer.monthly_fee) }})
-                            </option>
-                        </select>
-                    </div>
+                    <SearchableSelect
+                        v-model="form.customer_id"
+                        :options="customerOptions"
+                        label="Customer"
+                        placeholder="Search customer by name or package..."
+                        required
+                        :error="form.errors.customer_id"
+                        @update:modelValue="onCustomerChange"
+                    />
 
                     <CurrencyInput
                         v-model="form.amount"
@@ -59,9 +59,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
 import OwnerLayout from '../../Layouts/OwnerLayout.vue';
+import SearchableSelect from '../../Components/SearchableSelect.vue';
 import CurrencyInput from '../../Components/CurrencyInput.vue';
 import BaseButton from '../../Components/BaseButton.vue';
 
@@ -82,6 +83,14 @@ const amountInput = ref(null);
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
 };
+
+const customerOptions = computed(() => {
+    return props.customers.map(customer => ({
+        value: customer.id,
+        label: customer.name,
+        subtitle: `${customer.speed_package} - ${formatCurrency(customer.monthly_fee)}`,
+    }));
+});
 
 const onCustomerChange = () => {
     if (form.customer_id) {
