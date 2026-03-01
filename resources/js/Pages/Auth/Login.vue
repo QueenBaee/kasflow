@@ -52,19 +52,13 @@
                         </BaseButton>
                     </div>
                 </form>
-
-                <div class="mt-6 text-center">
-                    <Link href="/register" class="text-sm text-blue-600 hover:text-blue-700">
-                        Don't have an account? Register
-                    </Link>
-                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { useForm, Link } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import BaseButton from '../../Components/BaseButton.vue';
 
 const form = useForm({

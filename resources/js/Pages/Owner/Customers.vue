@@ -14,13 +14,15 @@
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
                             <div class="font-semibold text-gray-900">{{ customer.name }}</div>
-                            <div class="text-sm text-gray-500 mt-1">{{ customer.phone }}</div>
+                            <div class="text-sm text-gray-500 mt-1">{{ customer.phone || '-' }}</div>
+                            <div class="text-sm text-gray-500 mt-1">{{ customer.address || '-' }}</div>
                         </div>
                     </div>
                     <div class="flex justify-between items-center text-sm pt-2 border-t border-gray-100">
                         <div>
                             <div class="text-gray-500">{{ customer.speed_package }}</div>
                             <div class="font-medium text-gray-900 mt-1">{{ formatCurrency(customer.monthly_fee) }}</div>
+                            <div class="text-xs text-gray-500 mt-1">Join: {{ formatDate(customer.join_date) }} | Due: Day {{ customer.due_date || '-' }}</div>
                         </div>
                         <div class="flex gap-3">
                             <button @click="editCustomer(customer)" class="px-3 py-1.5 text-sm text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100">
@@ -44,24 +46,30 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Address</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Speed Package</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monthly Fee</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Join Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <tr v-for="customer in customers" :key="customer.id">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ customer.name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ customer.phone }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ customer.phone || '-' }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">{{ customer.address || '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ customer.speed_package }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatCurrency(customer.monthly_fee) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatDate(customer.join_date) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ customer.due_date ? `Day ${customer.due_date}` : '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 <button @click="editCustomer(customer)" class="text-blue-600 hover:text-blue-900">Edit</button>
                                 <button @click="deleteCustomer(customer)" class="text-red-600 hover:text-red-900">Delete</button>
                             </td>
                         </tr>
                         <tr v-if="customers.length === 0">
-                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">No customers yet</td>
+                            <td colspan="8" class="px-6 py-8 text-center text-gray-500">No customers yet</td>
                         </tr>
                     </tbody>
                 </table>
@@ -82,12 +90,24 @@
                         <input v-model="form.phone" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Address (Optional)</label>
+                        <textarea v-model="form.address" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Speed Package</label>
                         <input v-model="form.speed_package" type="text" required placeholder="e.g. 10 Mbps" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Monthly Fee (Rp)</label>
                         <input v-model="form.monthly_fee" type="number" required min="0" placeholder="e.g. 300000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Join Date (Optional)</label>
+                        <input v-model="form.join_date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Due Date (Day of Month, Optional)</label>
+                        <input v-model="form.due_date" type="number" min="1" max="31" placeholder="e.g. 5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div class="flex gap-3 pt-2">
                         <BaseButton type="submit" variant="primary" :loading="form.processing" class="flex-1">
@@ -113,6 +133,11 @@ const formatCurrency = (value) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
 };
 
+const formatDate = (date) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
+
 const props = defineProps({
     stores: { type: Array, required: true },
     currentStore: { type: Object, default: null },
@@ -125,16 +150,22 @@ const editingCustomer = ref(null);
 const form = useForm({
     name: '',
     phone: '',
+    address: '',
     speed_package: '',
     monthly_fee: 0,
+    join_date: '',
+    due_date: null,
 });
 
 const editCustomer = (customer) => {
     editingCustomer.value = customer;
     form.name = customer.name;
     form.phone = customer.phone;
+    form.address = customer.address;
     form.speed_package = customer.speed_package;
     form.monthly_fee = customer.monthly_fee;
+    form.join_date = customer.join_date;
+    form.due_date = customer.due_date;
 };
 
 const closeModal = () => {

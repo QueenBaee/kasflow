@@ -13,8 +13,11 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
             'speed_package' => 'required|string|max:100',
             'monthly_fee' => 'required|numeric|min:0',
+            'join_date' => 'nullable|date',
+            'due_date' => 'nullable|integer|min:1|max:31',
         ]);
 
         $store->customers()->create($validated);
@@ -27,8 +30,11 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
             'speed_package' => 'required|string|max:100',
             'monthly_fee' => 'required|numeric|min:0',
+            'join_date' => 'nullable|date',
+            'due_date' => 'nullable|integer|min:1|max:31',
         ]);
 
         $customer->update($validated);

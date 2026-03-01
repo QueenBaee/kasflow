@@ -10,8 +10,6 @@ Route::get('/', fn() => redirect()->route('login'));
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', fn() => Inertia::render('Auth/Login'))->name('login');
-    Route::get('/register', fn() => Inertia::render('Auth/Register'))->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
 });
 
@@ -141,6 +139,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/stores/{store}/customers', [\App\Http\Controllers\CustomerController::class, 'store'])->name('customers.store');
         Route::put('/stores/{store}/customers/{customer}', [\App\Http\Controllers\CustomerController::class, 'update'])->name('customers.update');
         Route::delete('/stores/{store}/customers/{customer}', [\App\Http\Controllers\CustomerController::class, 'destroy'])->name('customers.destroy');
+        
+        Route::get('/stores/{store}/reports/export-pdf', [\App\Http\Controllers\ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+        Route::get('/stores/{store}/reports/export-csv', [\App\Http\Controllers\ReportController::class, 'exportCsv'])->name('reports.export.csv');
     });
 
     // Shared route (Owner + Cashier)

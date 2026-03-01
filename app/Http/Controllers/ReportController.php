@@ -3,62 +3,88 @@
 namespace App\Http\Controllers;
 
 use App\Models\Store;
-use App\Services\ReportService;
-use Illuminate\Http\JsonResponse;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 
 class ReportController extends Controller
 {
-    public function __construct(private ReportService $reportService)
+    public function exportPdf(Request $request, Store $store)
     {
-    }
+        $startDate = $request->input('start_date', now()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->format('Y-m-d'));
+        
+        $income = $store->transactions()
+            ->where('type', 'income')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('amount');
+            
+        $expense = $store->transactions()
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('amount');
+            
+        $reportData = [
+            'total_income' => (float) $income,
+            'total_expense' => (float) $expense,
+            'profit' => (float) ($income - $expense),
+        ];
+        
+        $transactions = $store->transactions()
+            ->with(['user', 'customer'])
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-    public function dailyReport(Request $request, Store $store): JsonResponse
-    {
-        $this->authorize('viewReports', $store);
-
-        $request->validate([
-            'date' => ['required', 'date'],
+        $pdf = Pdf::loadView('reports.pdf', [
+            'store' => $store,
+            'reportData' => $reportData,
+            'transactions' => $transactions,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ]);
 
-        $report = $this->reportService->dailyReport($store->id, $request->date);
-
-        return response()->json(['data' => $report]);
+        return $pdf->download('report-'.$startDate.'-to-'.$endDate.'.pdf');
     }
 
-    public function weeklyReport(Request $request, Store $store): JsonResponse
+    public function exportCsv(Request $request, Store $store)
     {
-        $this->authorize('viewReports', $store);
+        $startDate = $request->input('start_date', now()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->format('Y-m-d'));
+        
+        $transactions = $store->transactions()
+            ->with(['user', 'customer'])
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        $request->validate([
-            'start_date' => ['required', 'date'],
-            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-        ]);
+        $filename = 'report-'.$startDate.'-to-'.$endDate.'.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ];
 
-        $report = $this->reportService->weeklyReport(
-            $store->id,
-            $request->start_date,
-            $request->end_date
-        );
+        $callback = function() use ($transactions) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Date', 'Type', 'Customer', 'Category', 'Note', 'Amount']);
 
-        return response()->json(['data' => $report]);
-    }
+            foreach ($transactions as $transaction) {
+                fputcsv($file, [
+                    $transaction->transaction_date,
+                    $transaction->type,
+                    $transaction->customer?->name ?? '-',
+                    $transaction->category ?? '-',
+                    $transaction->note ?? '-',
+                    $transaction->amount,
+                ]);
+            }
 
-    public function monthlyReport(Request $request, Store $store): JsonResponse
-    {
-        $this->authorize('viewReports', $store);
+            fclose($file);
+        };
 
-        $request->validate([
-            'month' => ['required', 'integer', 'between:1,12'],
-            'year' => ['required', 'integer', 'min:2000'],
-        ]);
-
-        $report = $this->reportService->monthlyReport(
-            $store->id,
-            $request->month,
-            $request->year
-        );
-
-        return response()->json(['data' => $report]);
+        return Response::stream($callback, 200, $headers);
     }
 }

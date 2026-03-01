@@ -10,12 +10,15 @@ class Customer extends Model
         'store_id',
         'name',
         'phone',
+        'address',
         'speed_package',
         'monthly_fee',
+        'join_date',
+        'due_date',
     ];
 
     protected $casts = [
-        'payment_date' => 'date',
+        'join_date' => 'date',
     ];
 
     public function store()

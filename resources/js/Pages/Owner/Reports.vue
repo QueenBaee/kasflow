@@ -7,6 +7,17 @@
                 <div class="space-y-4">
                     <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
                         <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Filter Type</label>
+                            <select
+                                v-model="filterType"
+                                @change="onFilterTypeChange"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                            >
+                                <option value="date">Date Range</option>
+                                <option value="month">Monthly</option>
+                            </select>
+                        </div>
+                        <div v-if="filterType === 'date'" class="flex-1">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                             <input
                                 v-model="startDate"
@@ -15,7 +26,7 @@
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg"
                             />
                         </div>
-                        <div class="flex-1">
+                        <div v-if="filterType === 'date'" class="flex-1">
                             <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
                             <input
                                 v-model="endDate"
@@ -24,12 +35,55 @@
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg"
                             />
                         </div>
+                        <div v-if="filterType === 'month'" class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                            <select
+                                v-model="selectedMonth"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                            >
+                                <option v-for="month in months" :key="month.value" :value="month.value">
+                                    {{ month.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <div v-if="filterType === 'month'" class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                            <select
+                                v-model="selectedYear"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                            >
+                                <option v-for="year in years" :key="year" :value="year">
+                                    {{ year }}
+                                </option>
+                            </select>
+                        </div>
                         <button
                             @click="loadReport"
                             class="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                         >
                             Load Report
                         </button>
+                    </div>
+                    
+                    <div class="flex gap-2 flex-wrap">
+                        <a
+                            :href="exportPdfUrl"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                            </svg>
+                            Export PDF
+                        </a>
+                        <a
+                            :href="exportCsvUrl"
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Export CSV
+                        </a>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -124,8 +178,63 @@ const props = defineProps({
 
 const startDate = ref(props.startDate);
 const endDate = ref(props.endDate);
+const filterType = ref('date');
+const selectedMonth = ref(new Date().getMonth() + 1);
+const selectedYear = ref(new Date().getFullYear());
 
 const today = computed(() => new Date().toISOString().split('T')[0]);
+
+const months = [
+    { value: 1, label: 'January' },
+    { value: 2, label: 'February' },
+    { value: 3, label: 'March' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'May' },
+    { value: 6, label: 'June' },
+    { value: 7, label: 'July' },
+    { value: 8, label: 'August' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'October' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'December' },
+];
+
+const years = computed(() => {
+    const currentYear = new Date().getFullYear();
+    const yearList = [];
+    for (let i = currentYear; i >= currentYear - 5; i--) {
+        yearList.push(i);
+    }
+    return yearList;
+});
+
+const onFilterTypeChange = () => {
+    if (filterType.value === 'month') {
+        const year = selectedYear.value;
+        const month = String(selectedMonth.value).padStart(2, '0');
+        const lastDay = new Date(year, selectedMonth.value, 0).getDate();
+        startDate.value = `${year}-${month}-01`;
+        endDate.value = `${year}-${month}-${lastDay}`;
+    }
+};
+
+const exportPdfUrl = computed(() => {
+    if (!props.currentStore) return '#';
+    return route('reports.export.pdf', {
+        store: props.currentStore.id,
+        start_date: startDate.value,
+        end_date: endDate.value,
+    });
+});
+
+const exportCsvUrl = computed(() => {
+    if (!props.currentStore) return '#';
+    return route('reports.export.csv', {
+        store: props.currentStore.id,
+        start_date: startDate.value,
+        end_date: endDate.value,
+    });
+});
 
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
@@ -137,6 +246,13 @@ const formatDate = (date) => {
 
 const loadReport = () => {
     if (props.currentStore) {
+        if (filterType.value === 'month') {
+            const year = selectedYear.value;
+            const month = String(selectedMonth.value).padStart(2, '0');
+            const lastDay = new Date(year, selectedMonth.value, 0).getDate();
+            startDate.value = `${year}-${month}-01`;
+            endDate.value = `${year}-${month}-${lastDay}`;
+        }
         router.reload({ 
             data: { 
                 start_date: startDate.value,
