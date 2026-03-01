@@ -8,7 +8,7 @@
             </div>
 
             <!-- Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <SummaryStatCard
                     label="Pemasukan Hari Ini"
                     :value="summary.todayIncome"
@@ -27,6 +27,22 @@
                     type="profit"
                     :subtitle="summary.todayProfit >= 0 ? 'Positif' : 'Negatif'"
                 />
+                
+                <!-- Due Customers Card -->
+                <button
+                    @click="showDueModal = true"
+                    class="bg-white hover:bg-gray-50 border-2 border-yellow-200 rounded-lg p-6 text-left transition-colors"
+                >
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-yellow-600">{{ dueCustomers.length }}</p>
+                    <p class="text-sm text-gray-600 mt-1">Pelanggan Jatuh Tempo</p>
+                </button>
             </div>
 
             <!-- Quick Actions -->
@@ -137,14 +153,59 @@
                 </div>
             </div>
         </div>
+
+        <!-- Due Customers Modal -->
+        <div v-if="showDueModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="showDueModal = false">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900">Pelanggan Jatuh Tempo</h2>
+                    <button @click="showDueModal = false" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="overflow-y-auto max-h-[calc(80vh-80px)]">
+                    <div v-if="dueCustomers.length === 0" class="px-6 py-12 text-center text-gray-500">
+                        Tidak ada pelanggan yang jatuh tempo
+                    </div>
+                    <div v-else class="divide-y divide-gray-200">
+                        <div v-for="customer in dueCustomers" :key="customer.id" class="px-6 py-4 hover:bg-gray-50">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3">
+                                        <h3 class="font-semibold text-gray-900">{{ customer.name }}</h3>
+                                        <PaymentStatusBadge :status="customer.payment_status" />
+                                    </div>
+                                    <div class="mt-2 space-y-1 text-sm text-gray-600">
+                                        <p v-if="customer.phone">📞 {{ customer.phone }}</p>
+                                        <p v-if="customer.address">📍 {{ customer.address }}</p>
+                                        <p>📦 {{ customer.speed_package }}</p>
+                                        <p class="font-medium text-gray-900">💰 {{ formatCurrency(customer.monthly_fee) }}/bulan</p>
+                                        <p>📅 Jatuh Tempo: Tanggal {{ customer.due_date }}</p>
+                                    </div>
+                                </div>
+                                <Link
+                                    :href="route('income.index', { customer_id: customer.id })"
+                                    class="ml-4 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
+                                >
+                                    Catat Pembayaran
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </OwnerLayout>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import OwnerLayout from '../../Layouts/OwnerLayout.vue';
 import SummaryStatCard from '../../Components/SummaryStatCard.vue';
+import PaymentStatusBadge from '../../Components/PaymentStatusBadge.vue';
 import { formatCurrency } from '../../Utils/currency';
 
 const props = defineProps({
@@ -159,7 +220,10 @@ const props = defineProps({
         }),
     },
     recentTransactions: { type: Array, default: () => [] },
+    dueCustomers: { type: Array, default: () => [] },
 });
+
+const showDueModal = ref(false);
 
 const currentDate = computed(() => {
     return new Date().toLocaleDateString('id-ID', {

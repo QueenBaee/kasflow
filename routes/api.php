@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CustomerPaymentStatusController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StoreController;
@@ -27,5 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/reports/daily', [ReportController::class, 'dailyReport']);
         Route::get('/reports/weekly', [ReportController::class, 'weeklyReport']);
         Route::get('/reports/monthly', [ReportController::class, 'monthlyReport']);
+        
+        Route::get('/customers/payment-status', [CustomerPaymentStatusController::class, 'index']);
     });
 });

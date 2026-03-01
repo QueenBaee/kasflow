@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
             
             $summary = ['todayIncome' => 0, 'todayExpense' => 0, 'todayProfit' => 0];
             $recentTransactions = [];
+            $dueCustomers = [];
             
             if ($currentStore) {
                 $today = now()->format('Y-m-d');
@@ -37,9 +38,12 @@ Route::middleware('auth')->group(function () {
                     'todayProfit' => (float) ($todayIncome - $todayExpense),
                 ];
                 $recentTransactions = $currentStore->transactions()->with('user')->latest('transaction_date')->latest('created_at')->limit(10)->get();
+                
+                // Get customers with due date approaching (jatuh tempo)
+                $dueCustomers = $currentStore->customers()->with('transactions')->aktif()->jatuhTempo()->get();
             }
             
-            return Inertia::render('Owner/Dashboard', compact('stores', 'currentStore', 'summary', 'recentTransactions'));
+            return Inertia::render('Owner/Dashboard', compact('stores', 'currentStore', 'summary', 'recentTransactions', 'dueCustomers'));
         })->name('dashboard');
 
         Route::get('/expenses', fn() => Inertia::render('Owner/Expenses', [
@@ -47,15 +51,17 @@ Route::middleware('auth')->group(function () {
             'currentStore' => auth()->user()->stores()->first(),
         ]))->name('expenses.index');
 
-        Route::get('/income', function () {
+        Route::get('/income', function (Request $request) {
             $user = auth()->user();
             $currentStore = $user->stores()->first();
-            $customers = $currentStore ? $currentStore->customers : [];
+            $customers = $currentStore ? $currentStore->customers()->aktif()->get() : [];
+            $selectedCustomerId = $request->input('customer_id') ? (int) $request->input('customer_id') : null;
             
             return Inertia::render('Owner/Income', [
                 'stores' => $user->stores,
                 'currentStore' => $currentStore,
                 'customers' => $customers,
+                'selectedCustomerId' => $selectedCustomerId,
             ]);
         })->name('income.index');
 
@@ -123,7 +129,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/customers', function () {
             $user = auth()->user();
             $currentStore = $user->stores()->first();
-            $customers = $currentStore ? $currentStore->customers : [];
+            $customers = $currentStore ? $currentStore->customers()->with('transactions')->get() : [];
             
             return Inertia::render('Owner/Customers', [
                 'stores' => $user->stores,

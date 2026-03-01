@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
 import OwnerLayout from '../../Layouts/OwnerLayout.vue';
 import SearchableSelect from '../../Components/SearchableSelect.vue';
@@ -70,6 +70,7 @@ const props = defineProps({
     stores: { type: Array, required: true },
     currentStore: { type: Object, default: null },
     customers: { type: Array, default: () => [] },
+    selectedCustomerId: { type: Number, default: null },
 });
 
 const form = useForm({
@@ -79,6 +80,28 @@ const form = useForm({
 });
 
 const amountInput = ref(null);
+
+// Watch for selectedCustomerId and auto-fill
+onMounted(() => {
+    if (props.selectedCustomerId) {
+        form.customer_id = props.selectedCustomerId;
+        const customer = props.customers.find(c => c.id === props.selectedCustomerId);
+        if (customer) {
+            form.amount = customer.monthly_fee;
+        }
+    }
+});
+
+// Also watch for changes
+watch(() => props.selectedCustomerId, (newId) => {
+    if (newId) {
+        form.customer_id = newId;
+        const customer = props.customers.find(c => c.id === newId);
+        if (customer) {
+            form.amount = customer.monthly_fee;
+        }
+    }
+});
 
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);

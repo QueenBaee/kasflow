@@ -18,6 +18,7 @@ class CustomerController extends Controller
             'monthly_fee' => 'required|numeric|min:0',
             'join_date' => 'nullable|date',
             'due_date' => 'nullable|integer|min:1|max:31',
+            'status' => 'nullable|in:AKTIF,ISOLIR,NONAKTIF',
         ]);
 
         $store->customers()->create($validated);
@@ -35,6 +36,7 @@ class CustomerController extends Controller
             'monthly_fee' => 'required|numeric|min:0',
             'join_date' => 'nullable|date',
             'due_date' => 'nullable|integer|min:1|max:31',
+            'status' => 'nullable|in:AKTIF,ISOLIR,NONAKTIF',
         ]);
 
         $customer->update($validated);

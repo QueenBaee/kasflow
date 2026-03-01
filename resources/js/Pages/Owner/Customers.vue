@@ -8,27 +8,50 @@
                 </BaseButton>
             </div>
 
-            <!-- Mobile View -->
-            <div class="md:hidden space-y-3">
-                <div v-for="customer in customers" :key="customer.id" class="bg-white rounded-lg shadow p-4 space-y-3">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <div class="font-semibold text-gray-900">{{ customer.name }}</div>
-                            <div class="text-sm text-gray-500 mt-1">{{ customer.phone || '-' }}</div>
-                            <div class="text-sm text-gray-500 mt-1">{{ customer.address || '-' }}</div>
+            <!-- Mobile View - Card Style -->
+            <div class="lg:hidden space-y-3">
+                <div v-for="customer in customers" :key="customer.id" class="rounded-lg shadow p-4" :class="customer.status === 'ISOLIR' ? 'bg-red-50' : 'bg-white'">
+                    <div class="space-y-3">
+                        <!-- Header -->
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-900 text-base">{{ customer.name }}</div>
+                                <div class="text-sm text-gray-500 mt-1">{{ customer.phone || '-' }}</div>
+                            </div>
+                            <div class="flex gap-2">
+                                <PaymentStatusBadge :status="customer.payment_status" />
+                                <CustomerStatusBadge :status="customer.status || 'AKTIF'" />
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex justify-between items-center text-sm pt-2 border-t border-gray-100">
-                        <div>
-                            <div class="text-gray-500">{{ customer.speed_package }}</div>
-                            <div class="font-medium text-gray-900 mt-1">{{ formatCurrency(customer.monthly_fee) }}</div>
-                            <div class="text-xs text-gray-500 mt-1">Bergabung: {{ formatDate(customer.join_date) }} | Jatuh Tempo: Tanggal {{ customer.due_date || '-' }}</div>
+
+                        <!-- Details Grid -->
+                        <div class="grid grid-cols-2 gap-3 text-sm pt-3 border-t border-gray-100">
+                            <div>
+                                <div class="text-gray-500 text-xs">Paket</div>
+                                <div class="font-medium text-gray-900 mt-0.5">{{ customer.speed_package }}</div>
+                            </div>
+                            <div>
+                                <div class="text-gray-500 text-xs">Biaya/Bulan</div>
+                                <div class="font-medium text-gray-900 mt-0.5">{{ formatCurrency(customer.monthly_fee) }}</div>
+                            </div>
+                            <div>
+                                <div class="text-gray-500 text-xs">Jatuh Tempo</div>
+                                <div class="font-medium text-gray-900 mt-0.5">Tgl {{ customer.due_date || '-' }}</div>
+                            </div>
                         </div>
-                        <div class="flex gap-3">
-                            <button @click="editCustomer(customer)" class="px-3 py-1.5 text-sm text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100">
+
+                        <!-- Address -->
+                        <div v-if="customer.address" class="text-sm text-gray-600 pt-2 border-t border-gray-100">
+                            <div class="text-gray-500 text-xs mb-1">Alamat</div>
+                            {{ customer.address }}
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex gap-2 pt-3 border-t border-gray-100">
+                            <button @click="editCustomer(customer)" class="flex-1 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 font-medium">
                                 Ubah
                             </button>
-                            <button @click="deleteCustomer(customer)" class="px-3 py-1.5 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100">
+                            <button @click="deleteCustomer(customer)" class="flex-1 px-3 py-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 font-medium">
                                 Hapus
                             </button>
                         </div>
@@ -39,37 +62,43 @@
                 </div>
             </div>
 
-            <!-- Desktop View -->
-            <div class="hidden md:block bg-white rounded-lg shadow overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
+            <!-- Desktop View - Fixed Width Table -->
+            <div class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+                <table class="w-full table-fixed">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telepon</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alamat</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paket Kecepatan</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Biaya Bulanan</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Bergabung</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tgl Jatuh Tempo</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                            <th class="w-[12%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                            <th class="w-[10%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telepon</th>
+                            <th class="w-[16%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alamat</th>
+                            <th class="w-[10%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paket</th>
+                            <th class="w-[10%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Biaya</th>
+                            <th class="w-[8%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">J. Tempo</th>
+                            <th class="w-[10%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pembayaran</th>
+                            <th class="w-[8%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="w-[16%] px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <tr v-for="customer in customers" :key="customer.id">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ customer.name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ customer.phone || '-' }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500">{{ customer.address || '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ customer.speed_package }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatCurrency(customer.monthly_fee) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatDate(customer.join_date) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ customer.due_date ? `Tanggal ${customer.due_date}` : '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <button @click="editCustomer(customer)" class="text-blue-600 hover:text-blue-900">Ubah</button>
+                        <tr v-for="customer in customers" :key="customer.id" :class="customer.status === 'ISOLIR' ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'">
+                            <td class="px-3 py-3 text-sm font-medium text-gray-900 truncate" :title="customer.name">{{ customer.name }}</td>
+                            <td class="px-3 py-3 text-sm text-gray-500 truncate" :title="customer.phone">{{ customer.phone || '-' }}</td>
+                            <td class="px-3 py-3 text-sm text-gray-500 truncate" :title="customer.address">{{ customer.address || '-' }}</td>
+                            <td class="px-3 py-3 text-sm text-gray-500 truncate" :title="customer.speed_package">{{ customer.speed_package }}</td>
+                            <td class="px-3 py-3 text-sm text-gray-500 truncate" :title="formatCurrency(customer.monthly_fee)">{{ formatCurrency(customer.monthly_fee) }}</td>
+                            <td class="px-3 py-3 text-sm text-gray-500">{{ customer.due_date ? `Tgl ${customer.due_date}` : '-' }}</td>
+                            <td class="px-3 py-3">
+                                <PaymentStatusBadge :status="customer.payment_status" />
+                            </td>
+                            <td class="px-3 py-3">
+                                <CustomerStatusBadge :status="customer.status || 'AKTIF'" />
+                            </td>
+                            <td class="px-3 py-3 text-right text-sm font-medium">
+                                <button @click="editCustomer(customer)" class="text-blue-600 hover:text-blue-900 mr-2">Ubah</button>
                                 <button @click="deleteCustomer(customer)" class="text-red-600 hover:text-red-900">Hapus</button>
                             </td>
                         </tr>
                         <tr v-if="customers.length === 0">
-                            <td colspan="8" class="px-6 py-8 text-center text-gray-500">Belum ada pelanggan</td>
+                            <td colspan="9" class="px-3 py-8 text-center text-gray-500">Belum ada pelanggan</td>
                         </tr>
                     </tbody>
                 </table>
@@ -109,6 +138,14 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Jatuh Tempo (Tanggal dalam Bulan, Opsional)</label>
                         <input v-model="form.due_date" type="number" min="1" max="31" placeholder="contoh: 5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select v-model="form.status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="AKTIF">Aktif</option>
+                            <option value="ISOLIR">Isolir</option>
+                            <option value="NONAKTIF">Nonaktif</option>
+                        </select>
+                    </div>
                     <div class="flex flex-col sm:flex-row gap-3 pt-2">
                         <BaseButton type="submit" variant="primary" :loading="form.processing" class="flex-1 w-full">
                             {{ editingCustomer ? 'Perbarui' : 'Tambah' }}
@@ -128,6 +165,8 @@ import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import OwnerLayout from '../../Layouts/OwnerLayout.vue';
 import BaseButton from '../../Components/BaseButton.vue';
+import PaymentStatusBadge from '../../Components/PaymentStatusBadge.vue';
+import CustomerStatusBadge from '../../Components/CustomerStatusBadge.vue';
 
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
@@ -155,6 +194,7 @@ const form = useForm({
     monthly_fee: 0,
     join_date: '',
     due_date: null,
+    status: 'AKTIF',
 });
 
 const editCustomer = (customer) => {
@@ -166,6 +206,7 @@ const editCustomer = (customer) => {
     form.monthly_fee = customer.monthly_fee;
     form.join_date = customer.join_date;
     form.due_date = customer.due_date;
+    form.status = customer.status || 'AKTIF';
 };
 
 const closeModal = () => {
