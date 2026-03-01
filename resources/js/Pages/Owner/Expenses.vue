@@ -2,39 +2,39 @@
     <OwnerLayout :stores="stores" :current-store="currentStore">
         <div class="space-y-6">
             <div class="flex items-center justify-between">
-                <h1 class="text-3xl font-bold text-gray-900">Record Expense</h1>
+                <h1 class="text-3xl font-bold text-gray-900">Catat Pengeluaran</h1>
             </div>
 
             <div class="max-w-2xl bg-white rounded-lg shadow p-6">
                 <form @submit.prevent="handleSubmit" class="space-y-6">
                     <CurrencyInput
                         v-model="form.amount"
-                        label="Amount"
+                        label="Jumlah"
                         :error="form.errors.amount"
                         id="amount"
                     />
 
                     <div>
                         <label for="category" class="block text-sm font-medium text-gray-700 mb-1">
-                            Category
+                            Kategori
                         </label>
                         <select
                             id="category"
                             v-model="form.category"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                         >
-                            <option value="">Select Category</option>
-                            <option value="Supplies">Supplies</option>
-                            <option value="Rent">Rent</option>
-                            <option value="Utilities">Utilities</option>
-                            <option value="Salary">Salary</option>
-                            <option value="Other">Other</option>
+                            <option value="">Pilih Kategori</option>
+                            <option value="Supplies">Perlengkapan</option>
+                            <option value="Rent">Sewa</option>
+                            <option value="Utilities">Utilitas</option>
+                            <option value="Salary">Gaji</option>
+                            <option value="Other">Lainnya</option>
                         </select>
                     </div>
 
                     <div>
                         <label for="date" class="block text-sm font-medium text-gray-700 mb-1">
-                            Date
+                            Tanggal
                         </label>
                         <input
                             id="date"
@@ -47,13 +47,13 @@
 
                     <div>
                         <label for="note" class="block text-sm font-medium text-gray-700 mb-1">
-                            Note (Optional)
+                            Catatan (Opsional)
                         </label>
                         <textarea
                             id="note"
                             v-model="form.note"
                             rows="3"
-                            placeholder="Add a note..."
+                            placeholder="Tambahkan catatan..."
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                         ></textarea>
                     </div>
@@ -67,13 +67,13 @@
                             :disabled="!form.amount || form.amount <= 0"
                             class="flex-1"
                         >
-                            Save Expense
+                            Simpan Pengeluaran
                         </BaseButton>
                         <Link
                             href="/dashboard"
                             class="flex-1 text-center px-6 py-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-semibold"
                         >
-                            Cancel
+                            Batal
                         </Link>
                     </div>
                 </form>

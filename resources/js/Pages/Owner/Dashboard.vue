@@ -3,29 +3,29 @@
         <div class="space-y-6">
             <!-- Header -->
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+                <h1 class="text-3xl font-bold text-gray-900">Beranda</h1>
                 <p class="text-gray-600 mt-1">{{ currentDate }}</p>
             </div>
 
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <SummaryStatCard
-                    label="Today's Income"
+                    label="Pemasukan Hari Ini"
                     :value="summary.todayIncome"
                     type="income"
-                    subtitle="Total sales today"
+                    subtitle="Total penjualan hari ini"
                 />
                 <SummaryStatCard
-                    label="Today's Expense"
+                    label="Pengeluaran Hari Ini"
                     :value="summary.todayExpense"
                     type="expense"
-                    subtitle="Total costs today"
+                    subtitle="Total biaya hari ini"
                 />
                 <SummaryStatCard
-                    label="Today's Profit"
+                    label="Keuntungan Hari Ini"
                     :value="summary.todayProfit"
                     type="profit"
-                    :subtitle="summary.todayProfit >= 0 ? 'Positive' : 'Negative'"
+                    :subtitle="summary.todayProfit >= 0 ? 'Positif' : 'Negatif'"
                 />
             </div>
 
@@ -40,8 +40,8 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="font-semibold text-gray-900">Record Income</p>
-                        <p class="text-sm text-gray-600">Add customer payment</p>
+                        <p class="font-semibold text-gray-900">Catat Pemasukan</p>
+                        <p class="text-sm text-gray-600">Tambah pembayaran pelanggan</p>
                     </div>
                 </Link>
 
@@ -54,8 +54,8 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="font-semibold text-gray-900">Record Expense</p>
-                        <p class="text-sm text-gray-600">Add new expense</p>
+                        <p class="font-semibold text-gray-900">Catat Pengeluaran</p>
+                        <p class="text-sm text-gray-600">Tambah pengeluaran baru</p>
                     </div>
                 </Link>
 
@@ -68,8 +68,8 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="font-semibold text-gray-900">View Reports</p>
-                        <p class="text-sm text-gray-600">Financial analysis</p>
+                        <p class="font-semibold text-gray-900">Lihat Laporan</p>
+                        <p class="text-sm text-gray-600">Analisis keuangan</p>
                     </div>
                 </Link>
             </div>
@@ -77,7 +77,7 @@
             <!-- Recent Transactions -->
             <div class="bg-white rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900">Recent Transactions</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">Transaksi Terbaru</h2>
                 </div>
                 <div class="divide-y divide-gray-200">
                     <div
@@ -115,7 +115,7 @@
                             </div>
                             <div>
                                 <p class="font-medium text-gray-900">
-                                    {{ transaction.type === 'income' ? 'Income' : 'Expense' }}
+                                    {{ transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}
                                     <span v-if="transaction.category" class="text-gray-500">- {{ transaction.category }}</span>
                                 </p>
                                 <p class="text-sm text-gray-500">{{ formatDateTime(transaction.created_at) }}</p>
@@ -132,7 +132,7 @@
                         </div>
                     </div>
                     <div v-if="recentTransactions.length === 0" class="px-6 py-12 text-center text-gray-500">
-                        No transactions yet
+                        Belum ada transaksi
                     </div>
                 </div>
             </div>

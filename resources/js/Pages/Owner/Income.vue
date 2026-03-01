@@ -2,14 +2,14 @@
     <OwnerLayout>
         <div class="max-w-2xl mx-auto">
             <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Record Income</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Catat Pemasukan</h2>
 
                 <form @submit.prevent="handleSubmit" class="space-y-6">
                     <SearchableSelect
                         v-model="form.customer_id"
                         :options="customerOptions"
-                        label="Customer"
-                        placeholder="Search customer by name or package..."
+                        label="Pelanggan"
+                        placeholder="Cari pelanggan berdasarkan nama atau paket..."
                         required
                         :error="form.errors.customer_id"
                         @update:modelValue="onCustomerChange"
@@ -17,7 +17,7 @@
 
                     <CurrencyInput
                         v-model="form.amount"
-                        label="Amount"
+                        label="Jumlah"
                         :error="form.errors.amount"
                         id="amount"
                         ref="amountInput"
@@ -25,11 +25,11 @@
                     />
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Note (Optional)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
                         <textarea
                             v-model="form.note"
                             rows="3"
-                            placeholder="Add a note..."
+                            placeholder="Tambahkan catatan..."
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         ></textarea>
                     </div>
@@ -42,14 +42,14 @@
                             :disabled="!form.customer_id || !form.amount || form.amount <= 0"
                             class="flex-1"
                         >
-                            Save Income
+                            Simpan Pemasukan
                         </BaseButton>
 
                         <Link
                             :href="route('dashboard')"
                             class="px-6 py-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                         >
-                            Cancel
+                            Batal
                         </Link>
                     </div>
                 </form>

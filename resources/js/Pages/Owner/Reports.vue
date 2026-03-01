@@ -1,24 +1,24 @@
 <template>
     <OwnerLayout :stores="stores" :current-store="currentStore">
         <div class="space-y-4 md:space-y-6">
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Financial Reports</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Laporan Keuangan</h1>
 
             <div class="bg-white rounded-lg shadow p-4 md:p-6">
                 <div class="space-y-4">
                     <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
                         <div class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Filter Type</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Filter</label>
                             <select
                                 v-model="filterType"
                                 @change="onFilterTypeChange"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg"
                             >
-                                <option value="date">Date Range</option>
-                                <option value="month">Monthly</option>
+                                <option value="date">Rentang Tanggal</option>
+                                <option value="month">Bulanan</option>
                             </select>
                         </div>
                         <div v-if="filterType === 'date'" class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
                             <input
                                 v-model="startDate"
                                 type="date"
@@ -27,7 +27,7 @@
                             />
                         </div>
                         <div v-if="filterType === 'date'" class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
                             <input
                                 v-model="endDate"
                                 type="date"
@@ -36,7 +36,7 @@
                             />
                         </div>
                         <div v-if="filterType === 'month'" class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Month</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Bulan</label>
                             <select
                                 v-model="selectedMonth"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg"
@@ -47,7 +47,7 @@
                             </select>
                         </div>
                         <div v-if="filterType === 'month'" class="flex-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
                             <select
                                 v-model="selectedYear"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg"
@@ -61,7 +61,7 @@
                             @click="loadReport"
                             class="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                         >
-                            Load Report
+                            Muat Laporan
                         </button>
                     </div>
                     
@@ -87,16 +87,16 @@
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <SummaryStatCard label="Income" :value="reportData.total_income" type="income" />
-                        <SummaryStatCard label="Expense" :value="reportData.total_expense" type="expense" />
-                        <SummaryStatCard label="Profit" :value="reportData.profit" type="profit" />
+                        <SummaryStatCard label="Pemasukan" :value="reportData.total_income" type="income" />
+                        <SummaryStatCard label="Pengeluaran" :value="reportData.total_expense" type="expense" />
+                        <SummaryStatCard label="Keuntungan" :value="reportData.profit" type="profit" />
                     </div>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="px-4 md:px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Transaction Details</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">Detail Transaksi</h2>
                 </div>
                 
                 <!-- Mobile View -->
@@ -108,7 +108,7 @@
                                 <div class="text-xs text-gray-500 mt-1">{{ transaction.customer?.name || '-' }}</div>
                             </div>
                             <span :class="transaction.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-1 text-xs font-semibold rounded-full">
-                                {{ transaction.type }}
+                                {{ transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}
                             </span>
                         </div>
                         <div class="text-xs text-gray-500" v-if="transaction.category">{{ transaction.category }}</div>
@@ -118,7 +118,7 @@
                         </div>
                     </div>
                     <div v-if="transactions.length === 0" class="p-8 text-center text-gray-500">
-                        No transactions found
+                        Tidak ada transaksi
                     </div>
                 </div>
 
@@ -127,12 +127,12 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Note</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipe</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pelanggan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catatan</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Jumlah</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -140,7 +140,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ formatDate(transaction.transaction_date) }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span :class="transaction.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-1 text-xs font-semibold rounded-full">
-                                        {{ transaction.type }}
+                                        {{ transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ transaction.customer?.name || '-' }}</td>
@@ -151,7 +151,7 @@
                                 </td>
                             </tr>
                             <tr v-if="transactions.length === 0">
-                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">No transactions found</td>
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">Tidak ada transaksi</td>
                             </tr>
                         </tbody>
                     </table>
@@ -185,18 +185,18 @@ const selectedYear = ref(new Date().getFullYear());
 const today = computed(() => new Date().toISOString().split('T')[0]);
 
 const months = [
-    { value: 1, label: 'January' },
-    { value: 2, label: 'February' },
-    { value: 3, label: 'March' },
+    { value: 1, label: 'Januari' },
+    { value: 2, label: 'Februari' },
+    { value: 3, label: 'Maret' },
     { value: 4, label: 'April' },
-    { value: 5, label: 'May' },
-    { value: 6, label: 'June' },
-    { value: 7, label: 'July' },
-    { value: 8, label: 'August' },
+    { value: 5, label: 'Mei' },
+    { value: 6, label: 'Juni' },
+    { value: 7, label: 'Juli' },
+    { value: 8, label: 'Agustus' },
     { value: 9, label: 'September' },
-    { value: 10, label: 'October' },
+    { value: 10, label: 'Oktober' },
     { value: 11, label: 'November' },
-    { value: 12, label: 'December' },
+    { value: 12, label: 'Desember' },
 ];
 
 const years = computed(() => {

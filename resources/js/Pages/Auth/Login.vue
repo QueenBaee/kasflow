@@ -4,7 +4,7 @@
             <div class="bg-white rounded-2xl shadow-xl p-8">
                 <div class="text-center mb-8">
                     <h1 class="text-4xl font-bold text-blue-600 mb-2">Kasflow</h1>
-                    <p class="text-gray-600">ISP Management System</p>
+                    <p class="text-gray-600">Sistem Manajemen ISP</p>
                 </div>
 
                 <form @submit.prevent="handleSubmit">
@@ -48,7 +48,7 @@
                             :loading="form.processing"
                             class="w-full"
                         >
-                            Login
+                            Masuk
                         </BaseButton>
                     </div>
                 </form>
