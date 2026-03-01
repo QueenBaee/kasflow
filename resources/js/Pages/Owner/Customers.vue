@@ -8,9 +8,19 @@
                 </BaseButton>
             </div>
 
+            <!-- Search Box -->
+            <div class="bg-white rounded-lg shadow p-4">
+                <input 
+                    v-model="searchQuery" 
+                    type="text" 
+                    placeholder="Cari nama, telepon, atau alamat..." 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+            </div>
+
             <!-- Mobile View - Card Style -->
             <div class="lg:hidden space-y-3">
-                <div v-for="customer in customers" :key="customer.id" class="rounded-lg shadow p-4" :class="customer.status === 'ISOLIR' ? 'bg-red-50' : 'bg-white'">
+                <div v-for="customer in filteredCustomers" :key="customer.id" class="rounded-lg shadow p-4" :class="customer.status === 'ISOLIR' ? 'bg-red-50' : 'bg-white'">
                     <div class="space-y-3">
                         <!-- Header -->
                         <div class="flex justify-between items-start">
@@ -57,8 +67,8 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="customers.length === 0" class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
-                    Belum ada pelanggan
+                <div v-if="filteredCustomers.length === 0" class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+                    {{ searchQuery ? 'Tidak ada pelanggan yang cocok' : 'Belum ada pelanggan' }}
                 </div>
             </div>
 
@@ -79,7 +89,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <tr v-for="customer in customers" :key="customer.id" :class="customer.status === 'ISOLIR' ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'">
+                        <tr v-for="customer in filteredCustomers" :key="customer.id" :class="customer.status === 'ISOLIR' ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'">
                             <td class="px-3 py-3 text-sm font-medium text-gray-900 truncate" :title="customer.name">{{ customer.name }}</td>
                             <td class="px-3 py-3 text-sm text-gray-500 truncate" :title="customer.phone">{{ customer.phone || '-' }}</td>
                             <td class="px-3 py-3 text-sm text-gray-500 truncate" :title="customer.address">{{ customer.address || '-' }}</td>
@@ -97,8 +107,8 @@
                                 <button @click="deleteCustomer(customer)" class="text-red-600 hover:text-red-900">Hapus</button>
                             </td>
                         </tr>
-                        <tr v-if="customers.length === 0">
-                            <td colspan="9" class="px-3 py-8 text-center text-gray-500">Belum ada pelanggan</td>
+                        <tr v-if="filteredCustomers.length === 0">
+                            <td colspan="9" class="px-3 py-8 text-center text-gray-500">{{ searchQuery ? 'Tidak ada pelanggan yang cocok' : 'Belum ada pelanggan' }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -161,7 +171,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import OwnerLayout from '../../Layouts/OwnerLayout.vue';
 import BaseButton from '../../Components/BaseButton.vue';
@@ -185,6 +195,20 @@ const props = defineProps({
 
 const showAddModal = ref(false);
 const editingCustomer = ref(null);
+const searchQuery = ref('');
+
+const filteredCustomers = computed(() => {
+    if (!searchQuery.value) return props.customers;
+    
+    const query = searchQuery.value.toLowerCase();
+    return props.customers.filter(customer => {
+        return (
+            customer.name?.toLowerCase().includes(query) ||
+            customer.phone?.toLowerCase().includes(query) ||
+            customer.address?.toLowerCase().includes(query)
+        );
+    });
+});
 
 const form = useForm({
     name: '',
