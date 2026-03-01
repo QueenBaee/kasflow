@@ -1,14 +1,44 @@
 <template>
     <OwnerLayout>
-        <div class="space-y-6">
+        <div class="space-y-4 md:space-y-6">
             <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-gray-900">Customers</h1>
-                <BaseButton @click="showAddModal = true" variant="primary">
-                    + Add Customer
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Customers</h1>
+                <BaseButton @click="showAddModal = true" variant="primary" size="sm" class="md:text-base">
+                    + Add
                 </BaseButton>
             </div>
 
-            <div class="bg-white rounded-lg shadow overflow-hidden">
+            <!-- Mobile View -->
+            <div class="md:hidden space-y-3">
+                <div v-for="customer in customers" :key="customer.id" class="bg-white rounded-lg shadow p-4 space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="font-semibold text-gray-900">{{ customer.name }}</div>
+                            <div class="text-sm text-gray-500 mt-1">{{ customer.phone }}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-sm pt-2 border-t border-gray-100">
+                        <div>
+                            <div class="text-gray-500">{{ customer.speed_package }}</div>
+                            <div class="font-medium text-gray-900 mt-1">{{ formatCurrency(customer.monthly_fee) }}</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button @click="editCustomer(customer)" class="px-3 py-1.5 text-sm text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100">
+                                Edit
+                            </button>
+                            <button @click="deleteCustomer(customer)" class="px-3 py-1.5 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="customers.length === 0" class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+                    No customers yet
+                </div>
+            </div>
+
+            <!-- Desktop View -->
+            <div class="hidden md:block bg-white rounded-lg shadow overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -39,17 +69,17 @@
         </div>
 
         <!-- Add/Edit Modal -->
-        <div v-if="showAddModal || editingCustomer" class="fixed inset-0 bg-gray-900 bg-opacity-20 flex items-center justify-center z-50" @click.self="closeModal">
-            <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-                <h2 class="text-xl font-bold mb-4">{{ editingCustomer ? 'Edit Customer' : 'Add Customer' }}</h2>
+        <div v-if="showAddModal || editingCustomer" class="fixed inset-0 bg-gray-900 bg-opacity-20 flex items-center justify-center z-50 p-4" @click.self="closeModal">
+            <div class="bg-white rounded-lg shadow-xl p-4 md:p-6 w-full max-w-md">
+                <h2 class="text-lg md:text-xl font-bold mb-4">{{ editingCustomer ? 'Edit Customer' : 'Add Customer' }}</h2>
                 <form @submit.prevent="submitForm" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
                         <input v-model="form.name" type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                        <input v-model="form.phone" type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone (Optional)</label>
+                        <input v-model="form.phone" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Speed Package</label>
