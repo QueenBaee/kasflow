@@ -37,6 +37,11 @@ class Customer extends Model
 
     public function getLastPaymentDateAttribute()
     {
+        if ($this->relationLoaded('transactions')) {
+            $last = $this->transactions->sortByDesc('transaction_date')->first();
+            return $last ? $last->transaction_date : null;
+        }
+
         $lastPayment = $this->transactions()
             ->where('type', 'income')
             ->latest('transaction_date')
@@ -52,27 +57,22 @@ class Customer extends Model
         }
 
         $today = Carbon::now();
-        $currentMonth = $today->month;
-        $currentYear = $today->year;
-        $billingDate = $this->due_date;
 
-        // Check if there's a payment in current month
-        $hasPaymentThisMonth = $this->transactions()
-            ->where('type', 'income')
-            ->whereYear('transaction_date', $currentYear)
-            ->whereMonth('transaction_date', $currentMonth)
-            ->exists();
+        if ($this->relationLoaded('transactions')) {
+            $hasPaymentThisMonth = $this->transactions->isNotEmpty();
+        } else {
+            $hasPaymentThisMonth = $this->transactions()
+                ->where('type', 'income')
+                ->whereYear('transaction_date', $today->year)
+                ->whereMonth('transaction_date', $today->month)
+                ->exists();
+        }
 
         if ($hasPaymentThisMonth) {
             return 'LUNAS';
         }
 
-        // Check if today has passed billing date
-        if ($today->day > $billingDate) {
-            return 'BELUM_BAYAR';
-        }
-
-        return 'JATUH_TEMPO';
+        return $today->day > $this->due_date ? 'BELUM_BAYAR' : 'JATUH_TEMPO';
     }
 
     // Query Scopes

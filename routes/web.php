@@ -129,7 +129,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/customers', function () {
             $user = auth()->user();
             $currentStore = $user->stores()->first();
-            $customers = $currentStore ? $currentStore->customers()->with('transactions')->get() : [];
+            $customers = $currentStore ? $currentStore->customers()->with(['transactions' => function ($q) {
+                $q->where('type', 'income')
+                  ->whereYear('transaction_date', now()->year)
+                  ->whereMonth('transaction_date', now()->month);
+            }])->get() : [];
             
             return Inertia::render('Owner/Customers', [
                 'stores' => $user->stores,
