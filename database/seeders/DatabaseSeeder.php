@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'ISP Maju Jaya',
         ]);
 
-        $store2 = Store::create([
+        $store1 = Store::create([
             'owner_id' => $owner->id,
             'name' => 'ISP Berkah',
         ]);
@@ -44,8 +44,8 @@ class DatabaseSeeder extends Seeder
         $store1->users()->attach($owner->id, ['role' => 'owner']);
         $store1->users()->attach($cashier1->id, ['role' => 'cashier']);
 
-        $store2->users()->attach($owner->id, ['role' => 'owner']);
-        $store2->users()->attach($cashier2->id, ['role' => 'cashier']);
+        $store1->users()->attach($owner->id, ['role' => 'owner']);
+        $store1->users()->attach($cashier2->id, ['role' => 'cashier']);
 
         $feeMap = [3 => 100000, 5 => 110000, 8 => 150000, 10 => 160000, 20 => 180000];
 
@@ -149,7 +149,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'SULTANALTAF',  'mbps' => 5,  'address' => 'buring',    'store' => $store1],
             ['name' => 'YULIATI1',     'mbps' => 5,  'address' => 'buring',    'store' => $store1],
             ['name' => 'PAKNUR',       'mbps' => 5,  'address' => 'buring',    'store' => $store1],
-            // jambearjo
+            // store1 - jambearjo
             ['name' => 'JAKOP',          'mbps' => 20, 'address' => 'jambearjo', 'store' => $store1],
             ['name' => 'MASADI',         'mbps' => 10, 'address' => 'jambearjo', 'store' => $store1],
             ['name' => 'MBAKLIA',        'mbps' => 10, 'address' => 'jambearjo', 'store' => $store1],
@@ -180,6 +180,40 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        for ($i = 0; $i < 10; $i++) {
+            Transaction::create([
+                'store_id' => $store1->id,
+                'user_id' => $cashier1->id,
+                'type' => 'income',
+                'amount' => rand(10000, 500000),
+                'category' => 'Payment',
+                'note' => 'Sample income transaction',
+                'transaction_date' => now()->subDays(rand(0, 30)),
+            ]);
+        }
 
+        for ($i = 0; $i < 5; $i++) {
+            Transaction::create([
+                'store_id' => $store1->id,
+                'user_id' => $owner->id,
+                'type' => 'expense',
+                'amount' => rand(50000, 300000),
+                'category' => ['Supplies', 'Rent', 'Utilities', 'Salary'][rand(0, 3)],
+                'note' => 'Sample expense transaction',
+                'transaction_date' => now()->subDays(rand(0, 30)),
+            ]);
+        }
+
+        for ($i = 0; $i < 8; $i++) {
+            Transaction::create([
+                'store_id' => $store1->id,
+                'user_id' => $cashier2->id,
+                'type' => 'income',
+                'amount' => rand(15000, 400000),
+                'category' => 'Payment',
+                'note' => 'Sample income transaction',
+                'transaction_date' => now()->subDays(rand(0, 30)),
+            ]);
+        }
     }
 }
