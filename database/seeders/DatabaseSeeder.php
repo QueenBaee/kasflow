@@ -13,6 +13,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Bersihkan data lama
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \DB::table('store_users')->truncate();
+        \DB::table('transactions')->truncate();
+        \DB::table('customers')->truncate();
+        \DB::table('stores')->truncate();
+        \DB::table('users')->truncate();
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         $owner = User::create([
             'name' => 'Owner User',
             'email' => 'owner@example.com',
@@ -36,15 +45,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'ISP Maju Jaya',
         ]);
 
-        $store1 = Store::create([
-            'owner_id' => $owner->id,
-            'name' => 'ISP Berkah',
-        ]);
-
         $store1->users()->attach($owner->id, ['role' => 'owner']);
         $store1->users()->attach($cashier1->id, ['role' => 'cashier']);
-
-        $store1->users()->attach($owner->id, ['role' => 'owner']);
         $store1->users()->attach($cashier2->id, ['role' => 'cashier']);
 
         $feeMap = [3 => 100000, 5 => 110000, 8 => 150000, 10 => 160000, 20 => 180000];
