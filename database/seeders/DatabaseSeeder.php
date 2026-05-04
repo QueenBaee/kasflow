@@ -24,8 +24,8 @@ class DatabaseSeeder extends Seeder
 
         $owner = User::create([
             'name' => 'Owner User',
-            'email' => 'owner@example.com',
-            'password' => Hash::make('password'),
+            'email' => 'Fitnet@gmail.com',
+            'password' => Hash::make('System123'),
         ]);
 
         $cashier1 = User::create([
